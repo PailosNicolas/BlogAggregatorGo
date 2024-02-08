@@ -21,3 +21,5 @@
 go.work
 Dockerfile
 .devcontainer/devcontainer.json
+.env
+.vscode/launch.json

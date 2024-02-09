@@ -19,7 +19,9 @@ func main() {
 	rV1 := chi.NewRouter()
 	r.Mount("/v1", rV1)
 
+	// these two are just for testing purpuses
 	rV1.Get("/readiness", v1.ReadinessHandler)
+	rV1.Get("/err", v1.ErrHandler)
 
 	http.ListenAndServe(":"+port, r)
 }

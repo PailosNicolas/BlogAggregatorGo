@@ -45,6 +45,7 @@ func main() {
 	rV1.Get("/err", v1.ErrHandler)
 
 	rV1.Post("/users", config.HandlerCreateNewUser)
+	rV1.Get("/users", config.HandlerGetUserByApiKey)
 
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }

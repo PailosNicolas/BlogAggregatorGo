@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/PailosNicolas/BlogAggregatorGo/helpers"
@@ -43,4 +44,25 @@ func (cfg *apiConfig) HandlerCreateNewUser(w http.ResponseWriter, r *http.Reques
 	}
 
 	helpers.RespondWithJSON(w, http.StatusOK, newUser)
+}
+
+func (cfg *apiConfig) HandlerGetUserByApiKey(w http.ResponseWriter, r *http.Request) {
+	api_key := r.Header.Get("Authorization")
+	api_key = strings.ReplaceAll(api_key, "ApiKey ", "")
+	ctx := r.Context()
+
+	if api_key == "" {
+		helpers.RespondWithError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	user, err := cfg.DB.GetUserByApiKey(ctx, api_key)
+
+	if err != nil {
+		helpers.RespondWithError(w, http.StatusInternalServerError, "Error getting user")
+		return
+	}
+
+	helpers.RespondWithJSON(w, http.StatusOK, user)
+
 }

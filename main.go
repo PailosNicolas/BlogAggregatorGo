@@ -50,6 +50,7 @@ func main() {
 
 	//Feeds
 	rV1.Post("/feeds", config.middlewareAuth(config.HandlerCreateNewFeed))
+	rV1.Get("/feeds", config.HandlerGetAllFeeds)
 
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }

@@ -50,3 +50,14 @@ func (cfg *apiConfig) HandlerCreateNewFeed(w http.ResponseWriter, r *http.Reques
 
 	helpers.RespondWithJSON(w, http.StatusOK, newFeed)
 }
+
+func (cfg *apiConfig) HandlerGetAllFeeds(w http.ResponseWriter, r *http.Request) {
+	feeds, err := cfg.DB.GetAllFeeds(r.Context())
+
+	if err != nil {
+		helpers.RespondWithError(w, http.StatusInternalServerError, "Error getting feeds")
+		return
+	}
+
+	helpers.RespondWithJSON(w, http.StatusOK, feeds)
+}

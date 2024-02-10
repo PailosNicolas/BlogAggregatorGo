@@ -44,8 +44,12 @@ func main() {
 	rV1.Get("/readiness", v1.ReadinessHandler)
 	rV1.Get("/err", v1.ErrHandler)
 
+	// User
 	rV1.Post("/users", config.HandlerCreateNewUser)
 	rV1.Get("/users", config.middlewareAuth(config.HandlerGetUserByApiKey))
+
+	//Feeds
+	rV1.Post("/feeds", config.middlewareAuth(config.HandlerCreateNewFeed))
 
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }

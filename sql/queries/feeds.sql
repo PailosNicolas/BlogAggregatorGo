@@ -14,3 +14,11 @@ RETURNING *;
 -- name: GetFeedById :one
 SELECT * FROM feeds
 WHERE id = $1;
+
+-- name: DeleteFeedFollowByID :exec
+DELETE FROM feeds_users
+WHERE id = $1 AND user_id = $2;
+
+-- name: GetFeedFollowById :one
+SELECT * FROM feeds_users
+WHERE id = $1;

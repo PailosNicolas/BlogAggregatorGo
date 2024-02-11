@@ -27,3 +27,7 @@ func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	}
 	w.Write(dat)
 }
+
+func RespondWithOK(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusOK)
+}

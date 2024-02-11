@@ -48,6 +48,21 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, e
 	return i, err
 }
 
+const deleteFeedFollowByID = `-- name: DeleteFeedFollowByID :exec
+DELETE FROM feeds_users
+WHERE id = $1 AND user_id = $2
+`
+
+type DeleteFeedFollowByIDParams struct {
+	ID     uuid.UUID
+	UserID uuid.UUID
+}
+
+func (q *Queries) DeleteFeedFollowByID(ctx context.Context, arg DeleteFeedFollowByIDParams) error {
+	_, err := q.db.ExecContext(ctx, deleteFeedFollowByID, arg.ID, arg.UserID)
+	return err
+}
+
 const followByFeedId = `-- name: FollowByFeedId :one
 INSERT INTO feeds_users (id, feed_id, user_id, created_at, updated_at)
 VALUES ($1, $2, $3, $4, $5)
@@ -127,6 +142,24 @@ func (q *Queries) GetFeedById(ctx context.Context, id uuid.UUID) (Feed, error) {
 		&i.ID,
 		&i.Name,
 		&i.Url,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getFeedFollowById = `-- name: GetFeedFollowById :one
+SELECT id, feed_id, user_id, created_at, updated_at FROM feeds_users
+WHERE id = $1
+`
+
+func (q *Queries) GetFeedFollowById(ctx context.Context, id uuid.UUID) (FeedsUser, error) {
+	row := q.db.QueryRowContext(ctx, getFeedFollowById, id)
+	var i FeedsUser
+	err := row.Scan(
+		&i.ID,
+		&i.FeedID,
 		&i.UserID,
 		&i.CreatedAt,
 		&i.UpdatedAt,

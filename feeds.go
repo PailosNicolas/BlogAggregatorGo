@@ -7,6 +7,7 @@ import (
 
 	"github.com/PailosNicolas/BlogAggregatorGo/helpers"
 	"github.com/PailosNicolas/BlogAggregatorGo/internal/database"
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
 
@@ -96,4 +97,38 @@ func (cfg *apiConfig) HandlerFollowFeed(w http.ResponseWriter, r *http.Request, 
 	}
 
 	helpers.RespondWithJSON(w, http.StatusOK, follow)
+}
+
+func (cfg *apiConfig) HandlerDeleteFollowFeed(w http.ResponseWriter, r *http.Request, user database.User) {
+	idStr := chi.URLParam(r, "feedFollowID")
+
+	idFeedFollow, err := uuid.Parse(idStr)
+
+	if err != nil {
+		helpers.RespondWithError(w, http.StatusInternalServerError, "Error getting parameter")
+	}
+
+	feedFollow, err := cfg.DB.GetFeedFollowById(r.Context(), idFeedFollow)
+
+	if err != nil {
+		helpers.RespondWithError(w, http.StatusInternalServerError, "Error")
+		return
+	}
+
+	if feedFollow.UserID != user.ID {
+		helpers.RespondWithError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	err = cfg.DB.DeleteFeedFollowByID(r.Context(), database.DeleteFeedFollowByIDParams{
+		ID:     feedFollow.ID,
+		UserID: user.ID,
+	})
+
+	if err != nil {
+		helpers.RespondWithError(w, http.StatusInternalServerError, "Error deleting follow")
+		return
+	}
+
+	helpers.RespondWithOK(w)
 }

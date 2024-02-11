@@ -48,6 +48,39 @@ func (q *Queries) CreateFeed(ctx context.Context, arg CreateFeedParams) (Feed, e
 	return i, err
 }
 
+const followByFeedId = `-- name: FollowByFeedId :one
+INSERT INTO feeds_users (id, feed_id, user_id, created_at, updated_at)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, feed_id, user_id, created_at, updated_at
+`
+
+type FollowByFeedIdParams struct {
+	ID        uuid.UUID
+	FeedID    uuid.UUID
+	UserID    uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (q *Queries) FollowByFeedId(ctx context.Context, arg FollowByFeedIdParams) (FeedsUser, error) {
+	row := q.db.QueryRowContext(ctx, followByFeedId,
+		arg.ID,
+		arg.FeedID,
+		arg.UserID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
+	var i FeedsUser
+	err := row.Scan(
+		&i.ID,
+		&i.FeedID,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getAllFeeds = `-- name: GetAllFeeds :many
 SELECT id, name, url, user_id, created_at, updated_at FROM feeds
 `
@@ -80,4 +113,23 @@ func (q *Queries) GetAllFeeds(ctx context.Context) ([]Feed, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const getFeedById = `-- name: GetFeedById :one
+SELECT id, name, url, user_id, created_at, updated_at FROM feeds
+WHERE id = $1
+`
+
+func (q *Queries) GetFeedById(ctx context.Context, id uuid.UUID) (Feed, error) {
+	row := q.db.QueryRowContext(ctx, getFeedById, id)
+	var i Feed
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Url,
+		&i.UserID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

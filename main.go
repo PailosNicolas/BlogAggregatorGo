@@ -53,6 +53,7 @@ func main() {
 	rV1.Get("/feeds", config.HandlerGetAllFeeds)
 	rV1.Post("/feed_follows", config.middlewareAuth(config.HandlerFollowFeed))
 	rV1.Delete("/feed_follows/{feedFollowID}", config.middlewareAuth(config.HandlerDeleteFollowFeed))
+	rV1.Get("/feed_follows", config.middlewareAuth(config.HandlerGetFollowFeed))
 
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }

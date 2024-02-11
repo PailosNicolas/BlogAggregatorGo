@@ -22,3 +22,7 @@ WHERE id = $1 AND user_id = $2;
 -- name: GetFeedFollowById :one
 SELECT * FROM feeds_users
 WHERE id = $1;
+
+-- name: GetAllFeedFollowByUserId :many
+SELECT * FROM feeds_users
+WHERE user_id = $1;

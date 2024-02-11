@@ -132,3 +132,14 @@ func (cfg *apiConfig) HandlerDeleteFollowFeed(w http.ResponseWriter, r *http.Req
 
 	helpers.RespondWithOK(w)
 }
+
+func (cfg *apiConfig) HandlerGetFollowFeed(w http.ResponseWriter, r *http.Request, user database.User) {
+	allFeddFollows, err := cfg.DB.GetAllFeedFollowByUserId(r.Context(), user.ID)
+
+	if err != nil {
+		helpers.RespondWithError(w, http.StatusInternalServerError, "Error getting feed")
+		return
+	}
+
+	helpers.RespondWithJSON(w, http.StatusOK, allFeddFollows)
+}

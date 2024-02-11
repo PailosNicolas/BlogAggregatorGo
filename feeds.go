@@ -16,6 +16,11 @@ func (cfg *apiConfig) HandlerCreateNewFeed(w http.ResponseWriter, r *http.Reques
 		Name string `json:"name"`
 		URL  string `json:"url"`
 	}
+	type createNewFeedDTO struct {
+		Feed       database.Feed      `json:"feed"`
+		FeedFollow database.FeedsUser `json:"feed_follow"`
+	}
+
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
 
@@ -49,7 +54,23 @@ func (cfg *apiConfig) HandlerCreateNewFeed(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	helpers.RespondWithJSON(w, http.StatusOK, newFeed)
+	follow, err := cfg.DB.FollowByFeedId(r.Context(), database.FollowByFeedIdParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		FeedID:    newFeed.ID,
+		UserID:    user.ID,
+	})
+
+	if err != nil {
+		helpers.RespondWithError(w, http.StatusInternalServerError, "Error creating feed")
+		return
+	}
+
+	helpers.RespondWithJSON(w, http.StatusOK, createNewFeedDTO{
+		Feed:       newFeed,
+		FeedFollow: follow,
+	})
 }
 
 func (cfg *apiConfig) HandlerGetAllFeeds(w http.ResponseWriter, r *http.Request) {

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/lib/pq"
 
@@ -32,6 +33,12 @@ func main() {
 	config := apiConfig{
 		DB: database.New(db),
 	}
+
+	go startScraping(
+		config.DB,
+		5,
+		time.Minute,
+	)
 
 	port := os.Getenv("PORT")
 

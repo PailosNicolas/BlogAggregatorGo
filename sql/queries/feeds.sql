@@ -26,3 +26,15 @@ WHERE id = $1;
 -- name: GetAllFeedFollowByUserId :many
 SELECT * FROM feeds_users
 WHERE user_id = $1;
+
+-- name: GetNextFeedsToFetch :many
+SELECT * from feeds
+ORDER BY last_updated_at ASC NULLS FIRST
+LIMIT $1;
+
+-- name: UpdateLastUpdatedAt :one
+UPDATE feeds
+SET last_updated_at = NOW(),
+updated_at = NOW()
+WHERE id = $1
+RETURNING *;

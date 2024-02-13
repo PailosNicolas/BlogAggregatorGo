@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"sync"
 	"time"
 
 	"github.com/PailosNicolas/BlogAggregatorGo/internal/database"
+	"github.com/google/uuid"
 )
 
 func startScraping(
@@ -50,12 +52,40 @@ func scrappeFeed(db *database.Queries, wg *sync.WaitGroup, feed database.Feed) {
 	rss, err := urlToFeed(feed.Url)
 
 	if err != nil {
-		log.Print("error getting rrs", err)
+		log.Print("error parsing rss", err)
 		return
 	}
 
+	// quick and ugly fix por parser
+	layout := "Mon, 02 Jan 2006 15:04:05 -0700"
+
 	for _, item := range rss.Channel.Item {
-		log.Println("Found post", item)
+		parsedTime, err := time.Parse(layout, item.PubDate)
+		if err != nil {
+			log.Println("Error parsing time:", err)
+			continue
+		}
+		_, err = db.CreatePost(context.Background(), database.CreatePostParams{
+			ID:        uuid.New(),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Title:     item.Title,
+			Url:       item.Link,
+			Description: sql.NullString{
+				String: item.Text,
+				Valid:  true,
+			},
+			PublishedAt: sql.NullTime{
+				Time:  parsedTime,
+				Valid: true,
+			},
+			FeedID: feed.ID,
+		})
+
+		if err != nil {
+			log.Println("Error creating post:", err)
+			continue
+		}
 	}
 
 }
